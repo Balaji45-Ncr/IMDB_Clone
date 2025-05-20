@@ -1,6 +1,6 @@
 from django.shortcuts import render,get_list_or_404,get_object_or_404
-from watchlist_app.models import Movie
-from watchlist_app.api.serializers import MovieSerializer
+from watchlist_app.models import WatchList,StreamingPlatform
+from watchlist_app.api.serializers import WatchListSerializer,StreamingPlatformSerializer
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
@@ -8,58 +8,57 @@ from rest_framework.decorators import api_view
 from rest_framework.views import APIView
 # @api_view(['GET','POST'])
 # def movie_list(request):
-#     movies=Movie.objects.all()
-#     if request.method=='POST':
-#         serializer=MovieSerializer(data=request.data)
-#         if serializer.is_valid():
-#             serializer.save()
-#             return Response(serializer.data,status=status.HTTP_201_CREATED)
-#         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
-#     serializer=MovieSerializer(movies,many=True)
-#     return Response(serializer.data,status=status.HTTP_200_OK)
+    # movies=Movie.objects.all()
+    # if request.method=='POST':
+    #     serializer=MovieSerializer(data=request.data)
+    #     if serializer.is_valid():
+    #         serializer.save()
+    #         return Response(serializer.data,status=status.HTTP_201_CREATED)
+    #     return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+    # serializer=MovieSerializer(movies,many=True)
+    # return Response(serializer.data,status=status.HTTP_200_OK)
 
 # @api_view(['GET','PUT','DELETE'])
 # def movie_details(request,pk):
-#     movie=Movie.objects.get(pk=pk)
-#     if request.method=='PUT':
-#         serializer=MovieSerializer(movie,data=request.data)
-#         if serializer.is_valid():
-#             serializer.save()
-#             return Response(serializer.data,status=status.HTTP_200_OK)
-#         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
-#     elif request.method=='DELETE':
-#         movie.delete()
-#         return Response(status=status.HTTP_204_NO_CONTENT)
-#     serializer=MovieSerializer(movie)
-#     return Response(serializer.data,status=status.HTTP_200_OK)
-
-class Movie_List(APIView):
+    # movie=Movie.objects.get(pk=pk)
+    # if request.method=='PUT':
+    #     serializer=MovieSerializer(movie,data=request.data)
+    #     if serializer.is_valid():
+    #         serializer.save()
+    #         return Response(serializer.data,status=status.HTTP_200_OK)
+    #     return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+    # elif request.method=='DELETE':
+    #     movie.delete()
+    #     return Response(status=status.HTTP_204_NO_CONTENT)
+    # serializer=MovieSerializer(movie)
+    # return Response(serializer.data,status=status.HTTP_200_OK)
+class WatchListAV(APIView):
     def get(self,request,*args,**kwargs):
-        movie=Movie.objects.all()
-        serializer=MovieSerializer(movie,many=True)
+        movie=WatchList.objects.all()
+        serializer=WatchListSerializer(movie,many=True)
         return Response(serializer.data,status=status.HTTP_200_OK)
     def post(self,request,*args,**kwargs):
-        serializer=MovieSerializer(data=request.data)
+        serializer=WatchListSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data,status=status.HTTP_201_CREATED)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
     
 
-class Movie_Details(APIView):
+class WatchDetailAV(APIView):
     def get(self,request,pk,*args,**kwargs):
-        movie=get_object_or_404(Movie,pk=pk)
-        serializer=MovieSerializer(movie)
+        movie=get_object_or_404(WatchList,pk=pk)
+        serializer=WatchListSerializer(movie)
         return Response(serializer.data,status=status.HTTP_200_OK)
     def put(self,request,pk,*args,**kwargs):
-        movie=get_object_or_404(Movie,pk=pk)
-        serializer=MovieSerializer(movie,data=request.data)
+        movie=get_object_or_404(WatchList,pk=pk)
+        serializer=WatchListSerializer(movie,data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data,status=status.HTTP_200_OK)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
     def delete(self,request,pk,*args,**kwargs):
-        movie=get_object_or_404(Movie,pk=pk)
+        movie=get_object_or_404(WatchList,pk=pk)
         movie.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
     
@@ -93,120 +92,156 @@ class Movie_Details(APIView):
     #     return self.get_paginated_response_with_serializer(serializer)
     # def get_paginated_response_with_serializer(self, serializer):
 
-        # return Response(serializer.data,
-        #                 pagination_info=self.get_paginated_info(page),
-        #                 status=status.HTTP_200_OK)
+    #     return Response(serializer.data,
+    #                     pagination_info=self.get_paginated_info(page),
+    #                     status=status.HTTP_200_OK)
 
-        # def get_paginated_info(self, page):
-        #     return {
-        #         'current_page': page.number,
-        #         'total_pages': page.paginator.num_pages,
-        #         'total_results': page.paginator.count,
-        #     }
+    #     def get_paginated_info(self, page):
+    #         return {
+    #             'current_page': page.number,
+    #             'total_pages': page.paginator.num_pages,
+    #             'total_results': page.paginator.count,
+    #         }
 
-        # def get_permissions(self):
-        #     if self.request.method in ['POST', 'PUT', 'DELETE']:
-        #         return [IsAuthenticated()]
-        #     return []
-        # def get_queryset(self):
-        #     queryset = Movie.objects.all()
-        #     return queryset
-        # def get_object(self, pk):
-        #     return get_object_or_404(Movie, pk=pk)
-        # def perform_create(self, serializer):
-        #     serializer.save()
-        # def perform_update(self, serializer):
-        #     serializer.save()
-        # def perform_destroy(self, instance):
-        #     instance.delete()
-        # def get_serializer_class(self):
-        #     if self.request.method == 'GET':
-        #         return MovieSerializer
-        #     else:
-        #         return MovieSerializer_Create
-        # def get_serializer_context(self):
-        #     return {'request': self.request}
-        # def filter_queryset(self, queryset):
-        #     search_query = self.request.query_params.get('search', None)
-        #     if search_query is not None:
-        #         queryset = queryset.filter(title__icontains=search_query)
-        #     return queryset
-        # def get_paginated_response(self, data):
-        #     page = self.paginate_queryset(data)
-        #     serializer = self.get_serializer(page, many=True)
-        #     return self.get_paginated_response_with_serializer(serializer)
-        # def get_paginated_response_with_serializer(self, serializer):
-        #     return Response(serializer.data,
-        #                     pagination_info=self.get_paginated_info(page),
-        #                     status=status.HTTP_200_OK)
-        # def get_paginated_info(self, page):
-        #     return {
-        #         'current_page': page.number,
-        #         'total_pages': page.paginator.num_pages,
-        #         'total_results': page.paginator.count,
-        #     }
-        # def get_permissions(self):
-        #     if self.request.method in ['POST', 'PUT', 'DELETE']:
-        #         return [IsAuthenticated()]
-        #     return []
+    #     def get_permissions(self):
+    #         if self.request.method in ['POST', 'PUT', 'DELETE']:
+    #             return [IsAuthenticated()]
+    #         return []
+    #     def get_queryset(self):
+    #         queryset = Movie.objects.all()
+    #         return queryset
+    #     def get_object(self, pk):
+    #         return get_object_or_404(Movie, pk=pk)
+    #     def perform_create(self, serializer):
+    #         serializer.save()
+    #     def perform_update(self, serializer):
+    #         serializer.save()
+    #     def perform_destroy(self, instance):
+    #         instance.delete()
+    #     def get_serializer_class(self):
+    #         if self.request.method == 'GET':
+    #             return MovieSerializer
+    #         else:
+    #             return MovieSerializer_Create
+    #     def get_serializer_context(self):
+    #         return {'request': self.request}
+    #     def filter_queryset(self, queryset):
+    #         search_query = self.request.query_params.get('search', None)
+    #         if search_query is not None:
+    #             queryset = queryset.filter(title__icontains=search_query)
+    #         return queryset
+    #     def get_paginated_response(self, data):
+    #         page = self.paginate_queryset(data)
+    #         serializer = self.get_serializer(page, many=True)
+    #         return self.get_paginated_response_with_serializer(serializer)
+    #     def get_paginated_response_with_serializer(self, serializer):
+    #         return Response(serializer.data,
+    #                         pagination_info=self.get_paginated_info(page),
+    #                         status=status.HTTP_200_OK)
+    #     def get_paginated_info(self, page):
+    #         return {
+    #             'current_page': page.number,
+    #             'total_pages': page.paginator.num_pages,
+    #             'total_results': page.paginator.count,
+    #         }
+    #     def get_permissions(self):
+    #         if self.request.method in ['POST', 'PUT', 'DELETE']:
+    #             return [IsAuthenticated()]
+    #         return []
 
-        # def get_queryset(self):
-        #     queryset = Movie.objects.all()
-        #     return queryset
-        # def get_object(self, pk):
-        #     return get_object_or_404(Movie, pk=pk)
-        # def perform_create(self, serializer):
-        #     serializer.save()
-        # def perform_update(self, serializer):
-        #     serializer.save()
-        # def perform_destroy(self, instance):
-        #     instance.delete()
-        # def get_serializer_class(self):
-        #     if self.request.method == 'GET':
-        #         return MovieSerializer
-        #     else:
-        #         return MovieSerializer_Create
-        # def get_serializer_context(self):
-        #     return {'request': self.request}
-        # def filter_queryset(self, queryset):
-        #     search_query = self.request.query_params.get('search', None)
-        #     if search_query is not None:
-        #         queryset = queryset.filter(title__icontains=search_query)
-        #     return queryset
-        # def get_paginated_response(self, data):
-        #     page = self.paginate_queryset(data)
-        #     serializer = self.get_serializer(page, many=True)
-        #     return self.get_paginated_response_with_serializer(serializer)
-        # def get_paginated_response_with_serializer(self, serializer):
-        #     return Response(serializer.data,
-        #                     pagination_info=self.get_paginated_info(page),
-        #                     status=status.HTTP_200_OK)
-        # def get_paginated_info(self, page):
-        #     return { 
-        #         'current_page': page.number,
-        #         'total_pages': page.paginator.num_pages,
-        #         'total_results': page.paginator.count,
-        #     }
-        # def get_permissions(self):
-        #     if self.request.method in ['POST', 'PUT', 'DELETE']:
-        #         return [IsAuthenticated()]
-        #     return []
-        # def get_queryset(self):
-        #     queryset = Movie.objects.all()
-        #     return queryset
-        # def get_object(self, pk):
-        #     return get_object_or_404(Movie, pk=pk)
-        # def perform_create(self, serializer):
-        #     serializer.save()
-        # def perform_update(self, serializer):
-        #     serializer.save()
-        # def perform_destroy(self, instance):
-        #     instance.delete()
-        # def get_serializer_class(self):
-        #     if self.request.method == 'GET':
-        #         return MovieSerializer
-        #     else:
-        #         return MovieSerializer_Create
-        # def get_serializer_context(self):
-        #     return {'request': self.request}
-        # def filter_queryset(self, queryset):
+    #     def get_queryset(self):
+    #         queryset = Movie.objects.all()
+    #         return queryset
+    #     def get_object(self, pk):
+    #         return get_object_or_404(Movie, pk=pk)
+    #     def perform_create(self, serializer):
+    #         serializer.save()
+    #     def perform_update(self, serializer):
+    #         serializer.save()
+    #     def perform_destroy(self, instance):
+    #         instance.delete()
+    #     def get_serializer_class(self):
+    #         if self.request.method == 'GET':
+    #             return MovieSerializer
+    #         else:
+    #             return MovieSerializer_Create
+    #     def get_serializer_context(self):
+    #         return {'request': self.request}
+    #     def filter_queryset(self, queryset):
+    #         search_query = self.request.query_params.get('search', None)
+    #         if search_query is not None:
+    #             queryset = queryset.filter(title__icontains=search_query)
+    #         return queryset
+    #     def get_paginated_response(self, data):
+    #         page = self.paginate_queryset(data)
+    #         serializer = self.get_serializer(page, many=True)
+    #         return self.get_paginated_response_with_serializer(serializer)
+    #     def get_paginated_response_with_serializer(self, serializer):
+    #         return Response(serializer.data,
+    #                         pagination_info=self.get_paginated_info(page),
+    #                         status=status.HTTP_200_OK)
+    #     def get_paginated_info(self, page):
+    #         return { 
+    #             'current_page': page.number,
+    #             'total_pages': page.paginator.num_pages,
+    #             'total_results': page.paginator.count,
+    #         }
+    #     def get_permissions(self):
+    #         if self.request.method in ['POST', 'PUT', 'DELETE']:
+    #             return [IsAuthenticated()]
+    #         return []
+    #     def get_queryset(self):
+    #         queryset = Movie.objects.all()
+    #         return queryset
+    #     def get_object(self, pk):
+    #         return get_object_or_404(Movie, pk=pk)
+    #     def perform_create(self, serializer):
+    #         serializer.save()
+    #     def perform_update(self, serializer):
+    #         serializer.save()
+    #     def perform_destroy(self, instance):
+    #         instance.delete()
+    #     def get_serializer_class(self):
+    #         if self.request.method == 'GET':
+    #             return MovieSerializer
+    #         else:
+    #             return MovieSerializer_Create
+    #     def get_serializer_context(self):
+    #         return {'request': self.request}
+    #     def filter_queryset(self, queryset):
+
+
+
+class StreamingListAV(APIView):
+        def get(self, request, *args, **kwargs):
+            streamings=StreamingPlatform.objects.all()
+            serializer=StreamingPlatformSerializer(streamings,many=True)
+            return Response(serializer.data,status=status.HTTP_200_OK)
+        def post(self, request, *args, **kwargs):
+            serializer=StreamingPlatformSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data,status=status.HTTP_201_CREATED)
+            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+
+class StreamingDetailAV(APIView):
+    def get_object(self, pk):   
+        try:
+            return StreamingPlatform.objects.get(pk=pk)
+        except StreamingPlatform.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+    def get(self, request, pk, *args, **kwargs):
+            streaming=self.get_object(pk)
+            serializer=StreamingPlatformSerializer(streaming)
+            return Response(serializer.data,status=status.HTTP_200_OK)
+    def put(self, request, pk, *args, **kwargs):
+            streaming=self.get_object(pk)
+            serializer=StreamingPlatformSerializer(streaming,data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data,status=status.HTTP_200_OK)
+            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+    def delete(self, request, pk, *args, **kwargs):
+            streaming=self.get_object(pk)
+            streaming.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
