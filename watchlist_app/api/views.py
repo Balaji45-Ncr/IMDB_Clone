@@ -1,10 +1,11 @@
 from django.shortcuts import render,get_list_or_404,get_object_or_404
-from watchlist_app.models import WatchList,StreamingPlatform
-from watchlist_app.api.serializers import WatchListSerializer,StreamingPlatformSerializer
+from watchlist_app.models import WatchList,StreamingPlatform,Review
+from watchlist_app.api.serializers import WatchListSerializer,StreamingPlatformSerializer,ReviewSerializer
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
-
+from rest_framework import generics
+from rest_framework import mixins
 from rest_framework.views import APIView
 # @api_view(['GET','POST'])
 # def movie_list(request):
@@ -32,6 +33,35 @@ from rest_framework.views import APIView
     #     return Response(status=status.HTTP_204_NO_CONTENT)
     # serializer=MovieSerializer(movie)
     # return Response(serializer.data,status=status.HTTP_200_OK)
+
+class ReviewList(mixins.ListModelMixin,mixins.CreateModelMixin,generics.GenericAPIView):
+     queryset = Review.objects.all()
+     serializer_class = ReviewSerializer
+
+     def get(self,request,*args,**kwargs):
+          return self.list(request,*args,**kwargs)
+     
+     def post(self,request,*args,**kwargs):
+          return self.create(request,*args,**kwargs)
+     
+class ReviewDetail(mixins.RetrieveModelMixin,mixins.UpdateModelMixin,mixins.DestroyModelMixin,generics.GenericAPIView):
+     queryset = Review.objects.all()
+     serializer_class = ReviewSerializer
+
+     def get(self,request,pk,*args,**kwargs):
+          return self.retrieve(request,pk,*args,**kwargs)
+     def put(self,request,pk,*args,**kwargs):   
+          return self.update(request,pk,*args,**kwargs)
+     def delete(self,request,pk,*args,**kwargs):
+          return self.destroy(request,pk,*args,**kwargs)
+     
+
+
+
+
+
+
+
 class WatchListAV(APIView):
     def get(self,request,*args,**kwargs):
         movie=WatchList.objects.all()
@@ -245,3 +275,9 @@ class StreamingDetailAV(APIView):
             streaming=self.get_object(pk)
             streaming.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
+    
+class ReviewListAV(generics.ListCreateAPIView):
+     queryset=Review.objects.all()
+     serializer_class=ReviewSerializer
+
+     
