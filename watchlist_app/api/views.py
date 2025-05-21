@@ -34,17 +34,17 @@ from rest_framework.views import APIView
     # serializer=MovieSerializer(movie)
     # return Response(serializer.data,status=status.HTTP_200_OK)
 
-class ReviewList(mixins.ListModelMixin,mixins.CreateModelMixin,generics.GenericAPIView):
-     queryset = Review.objects.all()
-     serializer_class = ReviewSerializer
+# class ReviewList(mixins.ListModelMixin,mixins.CreateModelMixin,generics.GenericAPIView):
+#      queryset = Review.objects.all()
+#      serializer_class = ReviewSerializer
 
-     def get(self,request,*args,**kwargs):
-          return self.list(request,*args,**kwargs)
+#      def get(self,request,*args,**kwargs):
+#           return self.list(request,*args,**kwargs)
      
-     def post(self,request,*args,**kwargs):
-          return self.create(request,*args,**kwargs)
+#      def post(self,request,*args,**kwargs):
+#           return self.create(request,*args,**kwargs)
      
-class ReviewDetail(mixins.RetrieveModelMixin,mixins.UpdateModelMixin,mixins.DestroyModelMixin,generics.GenericAPIView):
+class ReviewDetailAV(mixins.RetrieveModelMixin,mixins.UpdateModelMixin,mixins.DestroyModelMixin,generics.GenericAPIView):
      queryset = Review.objects.all()
      serializer_class = ReviewSerializer
 
@@ -55,12 +55,14 @@ class ReviewDetail(mixins.RetrieveModelMixin,mixins.UpdateModelMixin,mixins.Dest
      def delete(self,request,pk,*args,**kwargs):
           return self.destroy(request,pk,*args,**kwargs)
      
+class ReviewDetail(generics.RetrieveUpdateDestroyAPIView):
+     queryset=Review.objects.all()
+     serializer_class = ReviewSerializer
+     lookup_field='pk'
 
-
-
-
-
-
+class ReviewListAV(generics.ListCreateAPIView):
+     queryset = Review.objects.all()
+     serializer_class = ReviewSerializer
 
 class WatchListAV(APIView):
     def get(self,request,*args,**kwargs):
@@ -74,7 +76,6 @@ class WatchListAV(APIView):
             return Response(serializer.data,status=status.HTTP_201_CREATED)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
     
-
 class WatchDetailAV(APIView):
     def get(self,request,pk,*args,**kwargs):
         movie=get_object_or_404(WatchList,pk=pk)
@@ -240,8 +241,6 @@ class WatchDetailAV(APIView):
     #         return {'request': self.request}
     #     def filter_queryset(self, queryset):
 
-
-
 class StreamingListAV(APIView):
         def get(self, request, *args, **kwargs):
             streamings=StreamingPlatform.objects.all()
@@ -276,8 +275,20 @@ class StreamingDetailAV(APIView):
             streaming.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
     
-class ReviewListAV(generics.ListCreateAPIView):
+class ReviewListAVI(generics.ListCreateAPIView):
      queryset=Review.objects.all()
      serializer_class=ReviewSerializer
 
-     
+class ReviewList(generics.ListAPIView):
+     serializer_class=ReviewSerializer
+     def get_queryset(self):
+          pk=self.kwargs.get('pk')
+          return Review.objects.filter(watchlist=pk)
+          
+class ReviewCreate(generics.CreateAPIView):
+     serializer_class=ReviewSerializer
+
+     def perform_create(self, serializer):
+          pk=self.kwargs.get('pk')
+          movie=WatchList.objects.get(pk=pk)
+          serializer.save(watchlist=movie)
