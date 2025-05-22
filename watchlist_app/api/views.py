@@ -306,16 +306,26 @@ class ReviewCreate(generics.CreateAPIView):
           review_queryet=Review.objects.filter(review_user=user,watchlist=movie)
           if review_queryet.exists():
                raise ValidationError("You have already reviewed this movie!")
+          
+          if movie.number_ratings == 0:
+               movie.avg_rating=movie.avg_rating+ serializer.validated_data['rating']
+          else:
+               movie.avg_rating=(movie.avg_rating+serializer.validated_data['rating'])/2
+          
+          movie.number_ratings+=1
+          movie.save()
+
           serializer.save(watchlist=movie,review_user=user)
 
-# class review_for_movie(generics.CreateAPIView):
+# class ReviewCreate(generics.CreateAPIView):
 #      serializer_class=ReviewSerializer
-#      def perform_create(self,serializer):
-#           user=self.request.user
+
+#      def perform_create(self, serializer):
 #           pk=self.kwargs['pk']
-#           querying=WatchList.objects.get(pk=pk)
-#           review_query=Review.objects.filter(watchlist=querying,review_user=user)
-#           if review_query:
-#                raise ValidationError('already reviews by you')
-#           serializer.save()
-          
+#           watchlist_data=WatchList.objects.get(pk=pk)
+#           review_check=Review.objects.filter(review_user=self.request.user,watchlist=watchlist_data)
+#           if review_check.exists():
+#                raise ValidationError('You already given  review for this movie')
+#           serializer.save(review_user=self.request.user,watchlist=watchlist_data)
+               
+
