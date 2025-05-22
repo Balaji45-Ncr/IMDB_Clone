@@ -29,8 +29,10 @@ class WatchList(models.Model):
     active=models.BooleanField(default=True)
     created=models.DateTimeField(auto_now_add=True)
     platform=models.ForeignKey(StreamingPlatform, on_delete=models.CASCADE,related_name='watchlist',default=1)
-    avg_rating= models.FloatField(default=0)
-    number_ratings=models.IntegerField(default=0)
+    avg_rating_per_movie= models.FloatField(default=0)
+    number_of_ratings_per_movie=models.IntegerField(default=0)
+    total_avg_ratings=models.FloatField(default=0)
+    total_ratings=models.IntegerField(default=0)
     def __str__(self):
         return self.title
 

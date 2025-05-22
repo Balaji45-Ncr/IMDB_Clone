@@ -10,6 +10,7 @@ from rest_framework.views import APIView
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 from watchlist_app.api.permissions import AdminOrReadOnly,ReviewOwnerOrReadOnly
+from django.db.models import Avg
 # @api_view(['GET','POST'])
 # def movie_list(request):
     # movies=Movie.objects.all()
@@ -298,34 +299,44 @@ class ReviewCreate(generics.CreateAPIView):
      def get_queryset(self):
           return Review.objects.filter(review_user=self.request.user)
 
-     def perform_create(self,serializer):
-          
-          pk=self.kwargs.get('pk')
-          movie=WatchList.objects.get(pk=pk)
-          user=self.request.user
-          review_queryet=Review.objects.filter(review_user=user,watchlist=movie)
-          if review_queryet.exists():
-               raise ValidationError("You have already reviewed this movie!")
-          
-          if movie.number_ratings == 0:
-               movie.avg_rating=movie.avg_rating+ serializer.validated_data['rating']
-          else:
-               movie.avg_rating=(movie.avg_rating+serializer.validated_data['rating'])/2
-          
-          movie.number_ratings+=1
-          movie.save()
+     def perform_create(self, serializer):
+        pk = self.kwargs.get('pk')
+        movie = WatchList.objects.get(pk=pk)
+        overall_movie = WatchList.objects.all()
+        user = self.request.user
 
-          serializer.save(watchlist=movie,review_user=user)
+        # Check if user already reviewed this movie
+        review_queryset = Review.objects.filter(review_user=user, watchlist=movie)
+        if review_queryset.exists():
+            raise ValidationError("You have already reviewed this movie!")
 
-# class ReviewCreate(generics.CreateAPIView):
-#      serializer_class=ReviewSerializer
+        # Update movie's average rating
+        if movie.number_of_ratings_per_movie == 0:
+            movie.avg_rating_per_movie = serializer.validated_data['rating']
+        else:
+            movie.avg_rating_per_movie = (
+                movie.avg_rating_per_movie + serializer.validated_data['rating']
+            ) / 2
 
-#      def perform_create(self, serializer):
-#           pk=self.kwargs['pk']
-#           watchlist_data=WatchList.objects.get(pk=pk)
-#           review_check=Review.objects.filter(review_user=self.request.user,watchlist=watchlist_data)
-#           if review_check.exists():
-#                raise ValidationError('You already given  review for this movie')
-#           serializer.save(review_user=self.request.user,watchlist=watchlist_data)
-               
+        movie.number_of_ratings_per_movie += 1
+        movie.save()
 
+        serializer.save(watchlist=movie, review_user=user)
+
+        # Calculate total review count and average
+        reviews_count = Review.objects.count()
+        print(f'total reviews are :--->{reviews_count}')
+        total_avg_ratings = Review.objects.aggregate(avg=Avg('rating'))['avg']
+        print(f'avg_of all ratings:{total_avg_ratings}')
+
+        # Handle None case
+        if total_avg_ratings is None:
+            total_avg_ratings = 0
+
+        # Update all movies (this might not be necessary unless you have a reason)
+
+
+        overall_movie.update(
+            total_avg_ratings=total_avg_ratings,
+            total_ratings=reviews_count
+        )
