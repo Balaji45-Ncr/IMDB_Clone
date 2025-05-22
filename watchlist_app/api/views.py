@@ -8,6 +8,8 @@ from rest_framework import generics
 from rest_framework import mixins
 from rest_framework.views import APIView
 from rest_framework.exceptions import ValidationError
+from rest_framework.permissions import IsAuthenticated
+from watchlist_app.api.permissions import AdminOrReadOnly,ReviewOwnerOrReadOnly
 # @api_view(['GET','POST'])
 # def movie_list(request):
     # movies=Movie.objects.all()
@@ -60,6 +62,7 @@ class ReviewDetail(generics.RetrieveUpdateDestroyAPIView):
      queryset=Review.objects.all()
      serializer_class = ReviewSerializer
      lookup_field='pk'
+     permission_classes=[ReviewOwnerOrReadOnly]
 
 class ReviewListAV(generics.ListCreateAPIView):
      queryset = Review.objects.all()
@@ -282,12 +285,15 @@ class ReviewListAVI(generics.ListCreateAPIView):
 
 class ReviewList(generics.ListAPIView):
      serializer_class=ReviewSerializer
+     permission_classes=[AdminOrReadOnly]
+     #permi=[AdminOrReadOnly]
      def get_queryset(self):
           pk=self.kwargs.get('pk')
           return Review.objects.filter(watchlist=pk)
           
 class ReviewCreate(generics.CreateAPIView):
      serializer_class=ReviewSerializer
+     permission_classes=[AdminOrReadOnly]
 
      def get_queryset(self):
           return Review.objects.filter(review_user=self.request.user)
