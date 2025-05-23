@@ -9,7 +9,7 @@ from rest_framework import mixins
 from rest_framework.views import APIView
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
-from watchlist_app.api.permissions import AdminOrReadOnly,ReviewOwnerOrReadOnly
+from watchlist_app.api.permissions import IsAdminOrReadOnly,ReviewOwnerOrReadOnly
 from django.db.models import Avg
 # @api_view(['GET','POST'])
 # def movie_list(request):
@@ -70,6 +70,7 @@ class ReviewListAV(generics.ListCreateAPIView):
      serializer_class = ReviewSerializer
 
 class WatchListAV(APIView):
+    permission_classes=[IsAuthenticated]
     def get(self,request,*args,**kwargs):
         movie=WatchList.objects.all()
         serializer=WatchListSerializer(movie,many=True)
@@ -82,6 +83,7 @@ class WatchListAV(APIView):
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
     
 class WatchDetailAV(APIView):
+    permission_classes=[IsAuthenticated]
     def get(self,request,pk,*args,**kwargs):
         movie=get_object_or_404(WatchList,pk=pk)
         serializer=WatchListSerializer(movie)
@@ -247,6 +249,7 @@ class WatchDetailAV(APIView):
     #     def filter_queryset(self, queryset):
 
 class StreamingListAV(APIView):
+        permission_classes=[IsAuthenticated]
         def get(self, request, *args, **kwargs):
             streamings=StreamingPlatform.objects.all()
             serializer=StreamingPlatformSerializer(streamings,many=True)
@@ -259,6 +262,7 @@ class StreamingListAV(APIView):
             return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
 class StreamingDetailAV(APIView):
+    permission_classes=[IsAuthenticated]
     def get_object(self, pk):   
         try:
             return StreamingPlatform.objects.get(pk=pk)
@@ -286,7 +290,7 @@ class ReviewListAVI(generics.ListCreateAPIView):
 
 class ReviewList(generics.ListAPIView):
      serializer_class=ReviewSerializer
-     permission_classes=[AdminOrReadOnly]
+     permission_classes=[IsAdminOrReadOnly]
      #permi=[AdminOrReadOnly]
      def get_queryset(self):
           pk=self.kwargs.get('pk')
@@ -294,7 +298,7 @@ class ReviewList(generics.ListAPIView):
           
 class ReviewCreate(generics.CreateAPIView):
      serializer_class=ReviewSerializer
-     permission_classes=[AdminOrReadOnly]
+     permission_classes=[ReviewOwnerOrReadOnly]
 
      def get_queryset(self):
           return Review.objects.filter(review_user=self.request.user)
