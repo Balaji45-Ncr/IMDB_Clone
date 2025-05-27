@@ -344,3 +344,46 @@ class ReviewCreate(generics.CreateAPIView):
             total_avg_ratings=total_avg_ratings,
             total_ratings=reviews_count
         )
+
+
+'''
+JWT(Json web Tokens)
+
+from rest_framework_jwt.views import ObtainJSONWebToken 
+
+class JWTLoginView(ObtainJSONWebToken):
+    serializer_class = JWTLoginSerializer
+    def post(self, request, *args, **kwargs):
+        response = super().post(request, *args, **kwargs)
+        if response.status_code == 200:
+            user = self.get_user()
+            token = response.data['token']
+            # Add token to the response headers
+            response.data['token'] = 'Bearer'+ token
+            response.set_cookie(key='token', value='Bearer'+ token, httponly=True)
+            # Add user details to the response headers
+            response.data['user_id'] = user.id
+            response.data['username'] = user.username
+            response.data['email'] = user.email
+            response.data['is_admin'] = user.is_staff
+            response.data['is_superuser'] = user.is_superuser
+            return response
+
+            # OR if you want to return the token in a separate field
+            # response.data['token'] = token
+            # return response
+        return response
+
+JWT_AUTH = {
+    'JWT_RESPONSE_PAYLOAD_HANDLER': 'your_project.jwt_response_payload_handler',
+    'JWT_SECRET_KEY': SECRET_KEY,
+    'JWT_ALGORITHM': 'HS256',
+    'JWT_EXPIRATION_DELTA': timedelta(days=7),
+    'JWT_ALLOW_REFRESH': True,
+    'JWT_REFRESH_EXPIRATION_DELTA': timedelta(days=30),
+    'JWT_AUTH_HEADER_PREFIX': 'Bearer',
+}
+
+
+
+'''
