@@ -3,7 +3,7 @@ from watchlist_app.models import WatchList,StreamingPlatform,Review
 from watchlist_app.api.serializers import WatchListSerializer,StreamingPlatformSerializer,ReviewSerializer
 from rest_framework import status
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view,permission_classes,throttle_classes
 from rest_framework import generics
 from rest_framework import mixins
 from rest_framework.views import APIView
@@ -11,6 +11,8 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 from watchlist_app.api.permissions import IsAdminOrReadOnly,ReviewOwnerOrReadOnly
 from django.db.models import Avg
+from rest_framework.throttling import UserRateThrottle,AnonRateThrottle,ScopedRateThrottle
+from django_filters.rest_framework import DjangoFilterBackend
 # @api_view(['GET','POST'])
 # def movie_list(request):
     # movies=Movie.objects.all()
@@ -291,6 +293,8 @@ class ReviewListAVI(generics.ListCreateAPIView):
 class ReviewList(generics.ListAPIView):
      serializer_class=ReviewSerializer
      permission_classes=[IsAdminOrReadOnly]
+     filter_backends=[DjangoFilterBackend]
+     filterset_fields=['review_user__username','active']
      #permi=[AdminOrReadOnly]
      def get_queryset(self):
           pk=self.kwargs.get('pk')
@@ -387,3 +391,4 @@ JWT_AUTH = {
 
 
 '''
+
